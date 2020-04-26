@@ -8,6 +8,7 @@ class Table extends Component {
       dates: props.dates}
     this.setChecked = this.setChecked.bind(this)
     this.getRelevantData = this.getRelevantData.bind(this)
+    this.handleInput = this.handleInput.bind(this)
   }
   
   getRelevantData() {
@@ -15,7 +16,6 @@ class Table extends Component {
     const stateInfo = this.state.info
     for (let i = 0; i < stateInfo.length; i++){
       const cat = stateInfo[i].category
-      console.log(stateInfo[i])
       for (let j = 0; j < stateInfo[i].dates.length; j++){
         if (stateInfo[i].dates[j].checked){
           let objToPush = {
@@ -27,7 +27,7 @@ class Table extends Component {
         }
       }
     }
-    console.log('res', result)
+    console.log('result', result)
       
   }
 
@@ -35,12 +35,26 @@ class Table extends Component {
     const checkBox = document.getElementById(id)
     const lenDates = this.props.dates.length
     const objectNum = Math.trunc(id / lenDates)
-    console.log(objectNum)
     const newInfo = this.state.info
     newInfo[objectNum].dates[id % lenDates].checked = checkBox.checked
     
     this.setState({info: newInfo})
-    console.log('changed state', this.state)
+  }
+  
+  handleInput(isFirst, objectNum, dateNum, event) {
+    let valueToSet = event.target.value
+    if (valueToSet === ''){
+      valueToSet = 0
+    }
+    
+    const tempInfo = this.state.info
+    if (isFirst){
+      tempInfo[objectNum].dates[dateNum].priceBefore = parseInt(valueToSet)
+    }
+    else {
+      tempInfo[objectNum].dates[dateNum].priceAfter = parseInt(valueToSet)
+    }
+    this.setState({tempInfo})
   }
 
   printContent(cell){
@@ -73,10 +87,20 @@ class Table extends Component {
             <div>
               <input id={date.id} type='checkbox'  style={checkBoxStyle} onChange={() => this.setChecked(date.id)}/>
             </div>
-            <div>
-              <p>Price Before: {date.priceBefore}</p>
-              <p>Price After: {date.priceAfter}</p>
-            </div>
+            <div style={{width: '40%'}}>
+              <input 
+                type='text' 
+                style={{width: 70}}
+                value={this.state.info[objNumber].dates[dateNumber].priceBefore}
+                onChange={e => this.handleInput(true, objNumber, dateNumber, e)}>
+              </input>
+              <input 
+                type='text'
+                style={{width: 70}}
+                value={this.state.info[objNumber].dates[dateNumber].priceAfter} 
+                onChange={e => this.handleInput(false, objNumber, dateNumber, e)}>
+              </input>
+            </div>  
             <div>
               <img src={imgShow} alt="arrowImage" width='30px' height='30px'></img>
             </div>
@@ -111,7 +135,14 @@ class Table extends Component {
             {cellsData}
           </tbody>
         </table>
-        <button type='button' className="btn btn-lg btn-primary" onClick={this.getRelevantData}>Apply</button>
+        <button 
+          type='button' 
+          className="btn btn-lg btn-secondary mr-5 mt-2" 
+          onClick={this.getRelevantData} 
+          style={{
+            float: 'right', 
+            width: 150
+          }}>Apply</button>
       </div>
     )
   }
